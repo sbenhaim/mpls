@@ -1,13 +1,12 @@
 # max-clj
 
-A Clojure library designed to ... well, that part is up to you.
+Live coding Max4Live with Clojure.
 
 ## Usage
 
-FIXME
+Todo :(
 
 ## License
 
-Copyright © 2013 FIXME
-
+Copyright © 2013-2015 Selah Ben-Haim
 Distributed under the Eclipse Public License, the same as Clojure.
