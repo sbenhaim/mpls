@@ -27,7 +27,7 @@
 (defn call-user-fn [sym & args]
   (if-let [f (resolve (symbol (str @user-ns "/" sym)))]
     (let [inlet (.getInlet mpls)]
-      (apply f mpls inlet args))
+      (apply f inlet args))
     (println (str @user-ns "/" sym) " unimplemented.")))
 
 

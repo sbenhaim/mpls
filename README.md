@@ -5,8 +5,8 @@ Live-code Max and Max4Live with Clojure.
 
 ## Prereqs
 
-- [Max][https://cycling74.com/products/max/]
-- [Leiningen][http://leiningen.org/]
+- Max ([https://cycling74.com/products/max/]) or Max for Live ([https://www.ableton.com/en/live/max-for-live/])
+- Leiningen ([http://leiningen.org/])
 
 ## Setting Up
 
@@ -36,7 +36,9 @@ lein repl :connect localhost:[port]
 
 using `port` from above.
 
-You should now have a Clojure repl. (You can also use your repl-supporting Clojure editor to connect. Cider is supported with cider-nrepl v0.9.0-SNAPSHOT)
+You should now have a Clojure repl.
+
+(While a repl is a fine place to start, you'll eventually want to move your workflow to an nrepl-supporting text editor: Emacs, Vim, Sublime, IntelliJ, Eclipse, and Light Table are all good options. For Emacs, Cider is supported with cider-nrepl v0.9.0-SNAPSHOT)
 
 Test it out
 
@@ -52,7 +54,7 @@ Import some stuff
 (require '[mpls :refer :all])
 ```
 
-Do you first thing
+Do your first thing.
 
 ```clj
 (post "Here I am!")
@@ -64,22 +66,22 @@ Now create a `bang` object and connect it to `mpls`.
 
 ![](resources/2.png)
 
-Now bang! it.
+Now bang it!
 
 You should see something like `/bang unimplemented` in the Max window. Let's fix that.
 
-Announce yourself, like a good rock star.
+Announce yourself.
 
 ```clj
 (hello-mpls!)
 ```
 
-(`mpls` will dispatch messages sent to the `mpls` box to certain functions defined in the namespace that calls the `hello-mpls!` function, if you care.)
+If you're the curious sort, `hello-mpls!` tells `mpls` to find callback functions for inlet messages in the current namespace. One such function is the `bang` function, which will fire whenever `mpls` gets a `bang` message.
 
 Now define a function called `bang`.
 
 ```clj
-(defn bang [this inlet] (post "pew! pew! pew!"))
+(defn bang [inlet] (post "pew! pew! pew!"))
 ```
 
 Bang it again! Congratulations, you're live-coding Max.
@@ -120,7 +122,7 @@ See the magic.
 
 ```clj
 (def n (atom 0))
-(defn bang [this inlet] (out 1 (swap! n inc)))
+(defn bang [inlet] (out 1 (swap! n inc)))
 ```
 
 Bang away!
@@ -129,14 +131,14 @@ Bang away!
 
 You've seen `bang`, which responds to bangs on the inlet. There is also `int-msg` for ints, `float-msg` for floats, `list-msg` for lists, `dblclick` for mousey things, and `msg` for everything else.
 
-`bang` and `dblclick` take two arguments (`this` which is `mpls` : MaxObject, and the 0-indexed inlet number). `list-msg` and `msg` take three arguments, `this`, inlet, and a vector of args. `int-msg` and `float-msg` take three args: this, inlet, and a number.
+`bang` and `dblclick` take one arguments:the 0-indexed inlet number. `list-msg` and `msg` take two arguments: inlet and a vector of args. `int-msg` and `float-msg` take two arguments: inlet and a number.
 
 Messages sent to `mpls` for message boxes trigger `msg` calls with a vector of their space-delimited contents. An example to illustrate
 
 Create a message box with the text "reset", then
 
 ```clj
-(defn msg [this inlet [command]]
+(defn msg [inlet [command]]
   (when (= command "reset")
     (do
       (reset! n 0)
@@ -146,7 +148,7 @@ Create a message box with the text "reset", then
 Lets specify what to reset to. Connect another message box "reset 234"
 
 ```clj
-(defn msg [this inlet [command i]]
+(defn msg [inlet [command i]]
   (when (= command "reset")
     (do
       (reset! n (or i 0))
@@ -232,8 +234,8 @@ Linux: TODO
 
 You also have access to a few others
 
-- mpls : MaxObject - Our custom java class. Also the first argument to any msg-type function (`msg`, `bang`, `int-msg`)
-- box : MaxBox - The box enclosing `mxj mpls`
+- mpls : MaxObject - The `mpls` MaxObject
+- box : MaxBox - The box enclosing `mpls`
 - patcher : MaxPatcher - the patcher 
 - window : MaxWindow - the window
 
