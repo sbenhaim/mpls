@@ -16,15 +16,18 @@
 
 (declare mpls box patcher window port)
 
-(def user-ns (atom nil))
+(def user-ns
+  "holds the ns that user functions (`bang', `msg' will be defined)"
+  (atom nil))
 
 (defn hello-mpls! []
   (reset! user-ns *ns*)
-  (println "Looking for functions in" *ns*))
+  (println "Looking for functions in" (str *ns*)))
 
 (defn call-user-fn [sym & args]
-  (if-let [f (resolve (symbol (str @user-ns "/" sym)))]
-    (apply f mpls args)
+  (if-let [f (resolve (symbol (str @user-ns "/" sym)))
+           inlet (.getInlet mpls)]
+    (apply f mpls inlet args)
     (println (str @user-ns "/" sym) " unimplemented.")))
 
 
@@ -43,7 +46,7 @@
         :else nil))
 
 (defn matoms-> [as]
-  (map matom-> as))
+  (mapv matom-> as))
 
 (defn start-nrepl [port]
   (defonce server (server/start-server :port port :handler cider-nrepl-handler))
@@ -91,7 +94,7 @@
     (match args
            ["nrepl" "start"] (start-nrepl port)
            ["nrepl" "start" port] (start-nrepl port)
-           :else (call-user-fn 'msg ))))
+           :else (call-user-fn 'msg args))))
 
 (defn -dblclick [this]
   (call-user-fn 'dblclick))
@@ -128,7 +131,7 @@
 
 (defn out
   ([what] (out 0 what))
-  ([n what] (out mpls 0 what))
+  ([n what] (out mpls n what))
   ([who n what] (.outlet who n what)))
 
 (defn parse [s]
@@ -142,3 +145,6 @@
 
 (defn ouch [msg]
   (MaxSystem/ouch msg))
+
+(defn mremove [what]
+  (defer (.remove what)))
