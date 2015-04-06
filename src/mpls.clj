@@ -14,7 +14,7 @@
             [cider.nrepl :refer [cider-nrepl-handler]])
   (:import [com.cycling74.max MaxSystem Atom Executable]))
 
-(declare mpls box patcher window port)
+(declare mpls box patcher window port server)
 
 (def user-ns
   "holds the ns that user functions (`bang', `msg' will be defined)"
@@ -25,9 +25,9 @@
   (println "Looking for functions in" (str *ns*)))
 
 (defn call-user-fn [sym & args]
-  (if-let [f (resolve (symbol (str @user-ns "/" sym)))
-           inlet (.getInlet mpls)]
-    (apply f mpls inlet args)
+  (if-let [f (resolve (symbol (str @user-ns "/" sym)))]
+    (let [inlet (.getInlet mpls)]
+      (apply f mpls inlet args))
     (println (str @user-ns "/" sym) " unimplemented.")))
 
 
@@ -64,7 +64,7 @@
   ([this] (-post-init this 1 1))
   ([this _] (-post-init this))
   ([this _ in out] (-post-init this in out))
-  ([this in out] 
+  ([this in out]
      (.declareIO this in out)
      (defonce mpls this)
      (defonce box (.getMaxBox this))
@@ -74,8 +74,10 @@
 (defn -notifyDeleted [this]
   (try
     (call-user-fn 'shutdown))
-  (println "nrepl shutting down")
-  (server/stop-server server))
+  (when (bound? #'server)
+    (do
+      (println "nrepl shutting down")
+      (server/stop-server server))))
 
 (defn -bang [this]
   (call-user-fn 'bang))
