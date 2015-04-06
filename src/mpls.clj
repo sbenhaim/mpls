@@ -12,27 +12,28 @@
             [clojure.string :as s]
             [clojure.core.match :refer [match]]
             [cider.nrepl :refer [cider-nrepl-handler]])
-  (:import [com.cycling74.max Atom]))
+  (:import [com.cycling74.max MaxSystem Atom Executable]))
 
-(declare mpls max-box max-patcher max-window port)
+(declare mpls box patcher window port)
 
 (def user-ns (atom nil))
 
-(defn hello-max-clj! []
-  (reset! user-ns *ns*))
+(defn hello-mpls! []
+  (reset! user-ns *ns*)
+  (println "Looking for functions in" *ns*))
 
 (defn call-user-fn [sym & args]
   (if-let [f (resolve (symbol (str @user-ns "/" sym)))]
-    (apply f args)
+    (apply f mpls args)
     (println (str @user-ns "/" sym) " unimplemented.")))
 
 
 (defn matom [arg]
   (Atom/newAtom arg))
 
-(defn matoms [& args]
-  (if (or (nil? args) (empty? args)) nil
-      (into-array Atom (map matom args))))
+(defn matoms [arg-vec]
+  (if (or (nil? arg-vec) (empty? arg-vec)) nil
+      (into-array Atom (map matom arg-vec))))
 
 (defn matom-> [^Atom a]
   (cond (nil? a) nil
@@ -63,9 +64,9 @@
   ([this in out] 
      (.declareIO this in out)
      (defonce mpls this)
-     (defonce max-box (.getMaxBox this))
-     (defonce max-patcher (.getPatcher max-box))
-     (defonce max-window (.getWindow max-patcher))))
+     (defonce box (.getMaxBox this))
+     (defonce patcher (.getPatcher box))
+     (defonce window (.getWindow patcher))))
 
 (defn -notifyDeleted [this]
   (try
@@ -92,8 +93,52 @@
            ["nrepl" "start" port] (start-nrepl port)
            :else (call-user-fn 'msg ))))
 
+(defn -dblclick [this]
+  (call-user-fn 'dblclick))
+
 (defn msend [object message & args]
-  (.send object message (apply matoms args)))
+  (.send object message (matoms args)))
+
+(defmacro defer [& body]
+  `(MaxSystem/defer (reify Executable
+                      (execute [this]
+                        ~@body))))
+
+(defmacro defer-sync [body]
+  `(let [p# (promise)]
+     (MaxSystem/defer (reify Executable
+                        (execute [this]
+                          (deliver p# ~body))))
+     @p#))
 
 (defn mnew [name x y & args]
-  (.newDefault max-patcher x y name (apply matoms args)))
+  (defer-sync (.newDefault patcher x y name (matoms args))))
+
+(defn connect [o1 i1 o2 i2]
+  (.connect patcher o1 i1 o2 i2))
+
+(defn disconnect [o1 i1 o2 i2]
+  (defer (.disconnect patcher o1 i1 o2 i2)))
+
+(defn return [x]
+  (if (coll? x) x [x]))
+
+(defn dict-dict [d]
+  (s/join " " (map (fn [[k v]] (str (name k) " : " (s/join " " (return v)))) d)))
+
+(defn out
+  ([what] (out 0 what))
+  ([n what] (out mpls 0 what))
+  ([who n what] (.outlet who n what)))
+
+(defn parse [s]
+  (Atom/parse s))
+
+(defn post [msg]
+  (MaxSystem/post msg))
+
+(defn error [msg]
+  (MaxSystem/error msg))
+
+(defn ouch [msg]
+  (MaxSystem/ouch msg))
