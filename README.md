@@ -5,20 +5,22 @@ Live-code Max and Max4Live with Clojure.
 
 ## Prereqs
 
-- Max ([https://cycling74.com/products/max/]) or Max for Live ([https://www.ableton.com/en/live/max-for-live/])
+- Max (https://cycling74.com/products/max/) or Max for Live (https://www.ableton.com/en/live/max-for-live/)
 - Leiningen ([http://leiningen.org/])
 
 ## Setting Up
 
 Download `mpls.jar` and copy it into the java lib folder for Max.
 
-Mac: `/Applications/Max 6.1/Cycling '74/java/lib/`
-Windows: TODO
-Linux: TODO
+Mac: `/Applications/Max 6.1/Cycling '74/java/lib/`  
+Windows: TODO  
+Linux: TODO  
 
 ### Doing Stuff
 
-Launch Max/Max4Live and create an `mxj mpls` object. (If you get the error message "Could not load class 'mpls', double-check if you have the `mpls.jar` in the right place.")
+Launch Max/Max4Live and create an `mxj mpls` object.
+
+(If you get the error message "Could not load class 'mpls', double-check if you have the `mpls.jar`" in the right place. If you still get that error, open an issue, I guess.)
 
 Create a `nrepl start` message box and connect it to your `mxj mpls` box.
 
@@ -38,7 +40,7 @@ using `port` from above.
 
 You should now have a Clojure repl.
 
-(While a repl is a fine place to start, you'll eventually want to move your workflow to an nrepl-supporting text editor: Emacs, Vim, Sublime, IntelliJ, Eclipse, and Light Table are all good options. For Emacs, Cider is supported with cider-nrepl v0.9.0-SNAPSHOT)
+(While a repl is a fine place to start, you'll eventually want to move your workflow to an nrepl-supporting text editor. Emacs, Vim, Sublime, IntelliJ, Eclipse, and Light Table are all good options. For Emacs, Cider is supported with cider-nrepl v0.9.0-SNAPSHOT.)
 
 Test it out
 
@@ -60,7 +62,7 @@ Do your first thing.
 (post "Here I am!")
 ```
 
-If you Max logging window is open (Max > Window > Max Window), you will see `Here I am!` printed there.
+If your Max logging window is open (Max > Window > Max Window), you will see `Here I am!` printed there.
 
 Now create a `bang` object and connect it to `mpls`.
 
@@ -180,13 +182,13 @@ Once that's done, it's probably better to assign your creations so you can refer
 (def buttons (for [i (range 100)] (mnew "button" (* i 10) 200)))
 ```
 
-What, whuh? Didn't work. Or did it?
+What huh? Didn't work. Or did it?
 
 ```clj
 (doall buttons)
 ```
 
-There they are. Clojure `for` is lazy and not evaluated until needed. `doall` forces evaluation (as does printing to the repl, which is why it worked when we didn't assign the buttons to a var).
+There they are. Clojure `for` is lazy and entries are not realized until asked for. `doall` forces realization (as does printing to the repl, which is why it worked when we didn't assign the buttons to a var).
 
 You could also wrap the `for` statement in `doall` before assigning to `buttons`.
 
@@ -204,11 +206,11 @@ Pretty neat, huh.
 (doseq [b buttons] (mremove b))
 ```
 
-But that's just not as terse and cool as `(map mremove buttons)`, so do what you like.
+But `(map mremove buttons)` is just so terse and cool.
 
 ## Connecting things
 
-Still connecting objects with a mouse. For shame.
+Still connecting objects with a mouse? For shame.
 
 ```clj
 (def button (mnew "button" 200 200))
@@ -224,34 +226,34 @@ And disconnect
 
 ## Cast of characters
 
-Who's this `box` character? It's the the box that encloses `mxj mpls`. In max we connect boxes, which are all subclasses of `MaxBox` in java extensions. (Clojure just wraps the java api. You knew that, right?)
+Who's this `box` character? It's the the box that encloses `mxj mpls`. In max we connect boxes, which are all subclasses of `MaxBox` in java extensions. (`mpls` just wraps the java API in Clojure.)
 
-Want to know more about `MaxBox`es? You'll want to read the java api.
+Want to know more about `MaxBox`es? You'll want to read the java API.
 
-Mac: /Applications/Max [version]/java-doc/api/index.html
-Windows: TODO
-Linux: TODO
+Mac: /Applications/Max [version]/java-doc/api/index.html  
+Windows: TODO  
+Linux: TODO  
 
 You also have access to a few others
 
-- mpls : MaxObject - The `mpls` MaxObject
+- mpls : MaxObject - The custom java subclass of `MaxObject` that does all these nice things for us
 - box : MaxBox - The box enclosing `mpls`
 - patcher : MaxPatcher - the patcher 
 - window : MaxWindow - the window
 
 ## Warning! Warning!
 
-Now that you've been looking at the API, you're in a great position to crash Max hard. See, Max operates in a couple of different threads, and some threads don't allow some operations.
+Now that you've been looking at the API, you're in a great position to crash Max hard. See, Max operates in a couple of different threads, and some threads don't like some operations. As in, call these ops in the wrong thread and Max gracefully dies on the spot.
 
 When creating a traditional java extension, you wouldn't worry too much about this, because the methods you define are generally called for you in the proper context.
 
 However, when we're live-coding, we're crashing our cart right through those guardrails. While I've taken some care to prevent Max-crashing operations in the mpls API, there are no such accommodations when calling the java API directly.
 
-For example, creating graphical objects using the java API will crash Max:
+For example, creating graphical objects using the java API directly from the repl will crash Max:
 
 ```clj
 ;; DON'T DO THIS (except for educational purposes)
-(.newDefault patcher "button" 200 200 nil)
+(.newDefault patcher 200 200 "button" nil)
 ;; CRASH!
 ```
 
@@ -262,11 +264,11 @@ How do we circumvent this catastrophe? The `defer` function takes a body of code
 (defer (.newDefault patcher 200 200 "button" nil))
 ```
 
-You'll notice that defer returns `nil`. That's because the work is done asynchronously. If you want to do something with your new button, well, you'll need to use callbacks.
+You'll notice that defer always returns `nil`. That's because the work is done asynchronously. If you want to do something with your new button, well, you'll need to use callbacks.
 
 Just kidding!!!
 
-Use `defer-sync`, which will wait for your action to complete and return the result.
+Use `defer-sync`, which will block until your action completes and return the result.
 ```clj
 ;; Notice the return value
 (defer-sync (.newDefault patcher 200 200 "button" nil))
@@ -276,14 +278,18 @@ This is exactly how `mnew` works.
 
 So how do you know if your operation needs to be deferred? ¯\_(ツ)_/¯. Trial and error?
 
-## Misc
+## Music
+
+As much fun as we've had, we haven't created anything remotely musical yet. So now we're going to create something remotely musical.
+
+## Misc Topics
 
 ### mpls args
 
 In case you care, you can send args when creating `mpls`. One arg defines the nrepl port (default 51580), two args define the number of inlets and outlets you want (you get an extra info outlet, no extra charge!). Three args set `port`, `n-inlets`, `n-outlets`. Weird scheme, isn't it.
 
-```clj
-mxj mpls 1235 5 5
+```
+[mxj mpls 1235 5 5]
 ```
 
 ### matom, matoms, matom->, matoms->, parse
@@ -318,9 +324,9 @@ Most, but not all of `mpls`'s functionality is documented in this README. `mpls`
 
 Those TODOs in this README need TODOing. Pull requests or issues or emails could solve that if you're working on Windows or Linux.
 
-Also, I haven't tested this on anything on but my machine. Pull requests for bug or missing features are appreciated. Github issues are okay, too. Twitter shaming, not so much (though I'm not on Facebook, so feel free to post hurtful messages about bugs there).
+Also, I haven't tested this on anything on but my machine. Pull requests for bug or missing features are appreciated. Github issues are okay, too.
 
-And most of all, if you do something cool with this, post about it, and let me know.
+And most of all, if you do something cool with this, write a post, and let me know.
 
 ## License
 
