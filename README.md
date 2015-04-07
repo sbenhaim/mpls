@@ -5,8 +5,10 @@ Live-code Max and Max4Live with Clojure.
 
 ## Prereqs
 
-- Max (https://cycling74.com/products/max/) or Max for Live (https://www.ableton.com/en/live/max-for-live/)
-- Leiningen ([http://leiningen.org/])
+- Leiningen (http://leiningen.org/)
+- Max (https://cycling74.com/products/max/)
+  or  
+- Max for Live (https://www.ableton.com/en/live/max-for-live/)
 
 ## Setting Up
 

@@ -20,7 +20,9 @@
   "holds the ns that user functions (`bang', `msg' will be defined)"
   (atom nil))
 
-(defn hello-mpls! []
+(defn hello-mpls!
+  "Registers calling namespace as the place to look for inlet functions `bang', `int-msg', etc."
+  []
   (reset! user-ns *ns*)
   (println "Looking for functions in" (str *ns*)))
 
@@ -31,21 +33,29 @@
     (println (str @user-ns "/" sym) " unimplemented.")))
 
 
-(defn matom [arg]
+(defn matom
+  "Converts Clojure int/float/string to com.cycling74.max.Atom-wrapped value for use with the java API."
+  [arg]
   (Atom/newAtom arg))
 
-(defn matoms [arg-vec]
+(defn matoms
+  "Converts heterogeneous vec of Clojure values into an array of Atoms."
+  [arg-vec]
   (if (or (nil? arg-vec) (empty? arg-vec)) nil
       (into-array Atom (map matom arg-vec))))
 
-(defn matom-> [^Atom a]
+(defn matom->
+  "Converts an Atom to a Clojure value."
+  [^Atom a]
   (cond (nil? a) nil
         (.isInt a) (.getInt a)
         (.isFloat a) (.getFloat a)
         (.isString a) (.getString a)
         :else nil))
 
-(defn matoms-> [as]
+(defn matoms->
+  "Converts an array of Atoms into a vec of Clojure values."
+  [as]
   (mapv matom-> as))
 
 (defn start-nrepl [port]
@@ -104,49 +114,69 @@
 (defn msend [object message & args]
   (.send object message (matoms args)))
 
-(defmacro defer [& body]
+(defmacro defer
+  "Asynchronously execute `body' in the low-priority thread. Returns nil immediately."
+  [& body]
   `(MaxSystem/defer (reify Executable
                       (execute [this]
                         ~@body))))
 
-(defmacro defer-sync [body]
+(defmacro defer-sync
+  "Execute `body' in the low-priority thread. Block until it completes, and return the result."
+  [& body]
   `(let [p# (promise)]
      (MaxSystem/defer (reify Executable
                         (execute [this]
-                          (deliver p# ~body))))
+                          (deliver p# (do ~@body)))))
      @p#))
 
-(defn mnew [name x y & args]
+(defn mnew
+  "Create a new Max object of type `name' at coords `x',`y' with args `args'."
+  [name x y & args]
   (defer-sync (.newDefault patcher x y name (matoms args))))
 
-(defn connect [o1 i1 o2 i2]
-  (.connect patcher o1 i1 o2 i2))
+(defn connect
+  "Connect `outlet' of MaxBox object `o1' to `inlet' of MaxBox object `o2'."
+  [o1 outlet o2 inlet]
+  (.connect patcher o1 outlet o2 inlet))
 
-(defn disconnect [o1 i1 o2 i2]
-  (defer (.disconnect patcher o1 i1 o2 i2)))
+(defn disconnect
+  "Disconnect `outlet'  of MaxBox object `o1' to `inlet' of MaxBox object `o2'."
+  [o1 oulet o2 inlet]
+  (defer (.disconnect patcher o1 outlet o2 inlet)))
 
 (defn return [x]
   (if (coll? x) x [x]))
 
-(defn dict-dict [d]
+(defn dict-dict
+  "Convert Clojure dictionary to serialized dictionary, suitable input for Max's [dict.deserialize] object."
+  [d]
   (s/join " " (map (fn [[k v]] (str (name k) " : " (s/join " " (return v)))) d)))
 
 (defn out
+  "[what] sends `what' to mpls's 0th outlet.
+  [n what] sends `what' to `n'th outlet.
+  [who n what] sends `what' to `n'th outlet of MaxBox `who'."
   ([what] (out 0 what))
   ([n what] (out mpls n what))
   ([who n what] (.outlet who n what)))
 
-(defn parse [s]
+(defn parse
+  "Parse space-delimited string into array of Atoms."
+  [s]
   (Atom/parse s))
 
-(defn post [msg]
+(defn post
+  "Print message to Max window."
+  [msg]
   (MaxSystem/post msg))
 
-(defn error [msg]
+(defn error
+  "Print error to Max window."
+  [msg]
   (MaxSystem/error msg))
 
-(defn ouch [msg]
-  (MaxSystem/ouch msg))
-
-(defn mremove [what]
+(defn mremove
+  "Remove MaxBox `what' from patcher."
+  [what]
   (defer (.remove what)))
