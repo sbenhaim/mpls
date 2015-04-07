@@ -142,7 +142,7 @@
 
 (defn disconnect
   "Disconnect `outlet'  of MaxBox object `o1' to `inlet' of MaxBox object `o2'."
-  [o1 oulet o2 inlet]
+  [o1 outlet o2 inlet]
   (defer (.disconnect patcher o1 outlet o2 inlet)))
 
 (defn return [x]
