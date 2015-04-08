@@ -22,7 +22,7 @@ Linux: TODO
 
 Launch Max/Max4Live and create an `mxj mpls` object.
 
-(If you get the error message "Could not load class 'mpls', double-check if you have the `mpls.jar`" in the right place. If you still get that error, open an issue, I guess.)
+(If you get the error message "Could not load class 'mpls'", double-check where you put your `mpls.jar`.)
 
 Create a `nrepl start` message box and connect it to your `mxj mpls` box.
 
@@ -283,6 +283,8 @@ So how do you know if your operation needs to be deferred? ¯\_(ツ)_/¯. Trial 
 ## Music
 
 As much fun as we've had, we haven't created anything remotely musical yet. So now we're going to create something remotely musical.
+
+TODO (hah!)
 
 ## Misc Topics
 
