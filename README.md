@@ -42,7 +42,7 @@ using `port` from above.
 
 You should now have a Clojure repl.
 
-_While a repl is a fine place to start, you'll eventually want to move your workflow to an nrepl-supporting text editor. Emacs, Vim, Light Table, Sublime, IntelliJ, and Eclipse are all good options. For Emacs, Cider is supported with cider-nrepl v0.9.0-SNAPSHOT._
+> While a repl is a fine place to start, you'll eventually want to move your workflow to an nrepl-supporting text editor. Emacs, Vim, Light Table, Sublime, IntelliJ, and Eclipse are all good options. For Emacs, Cider is supported with cider-nrepl v0.9.0-SNAPSHOT.
 
 Test it out
 
