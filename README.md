@@ -42,7 +42,7 @@ using `port` from above.
 
 You should now have a Clojure repl.
 
-(While a repl is a fine place to start, you'll eventually want to move your workflow to an nrepl-supporting text editor. Emacs, Vim, Sublime, IntelliJ, Eclipse, and Light Table are all good options. For Emacs, Cider is supported with cider-nrepl v0.9.0-SNAPSHOT.)
+_While a repl is a fine place to start, you'll eventually want to move your workflow to an nrepl-supporting text editor. Emacs, Vim, Light Table, Sublime, IntelliJ, and Eclipse are all good options. For Emacs, Cider is supported with cider-nrepl v0.9.0-SNAPSHOT._
 
 Test it out
 
@@ -64,7 +64,7 @@ Do your first thing.
 (post "Here I am!")
 ```
 
-If your Max logging window is open (Max > Window > Max Window), you will see `Here I am!` printed there.
+If your Max logging window is open (Max > Window > Max Window), you'll hopefully see `Here I am!` printed there.
 
 Now create a `bang` object and connect it to `mpls`.
 
@@ -80,7 +80,7 @@ Announce yourself.
 (hello-mpls!)
 ```
 
-If you're the curious sort, `hello-mpls!` tells `mpls` to find callback functions for inlet messages in the current namespace. One such function is the `bang` function, which will fire whenever `mpls` gets a `bang` message.
+> If you're the curious sort, `hello-mpls!` tells `mpls` to find callback functions for inlet messages in the current namespace. One such function is the `bang` function, which will fire whenever `mpls` gets a `bang` message.
 
 Now define a function called `bang`.
 
@@ -103,7 +103,7 @@ To see your message, create a message box, wire the first outlet of `mxj mpls` t
 ![](resources/3.png)
 
 ```clj
-(out "hello, there")
+(out "hello out there")
 ```
 
 Connect the second outlet to an integer box. Then try
@@ -120,8 +120,6 @@ And this
 (dotimes [i 1000] (out 1 i))
 ```
 
-See the magic.
-
 ## Tying it together
 
 ```clj
@@ -137,7 +135,7 @@ You've seen `bang`, which responds to bangs on the inlet. There is also `int-msg
 
 `bang` and `dblclick` take one arguments:the 0-indexed inlet number. `list-msg` and `msg` take two arguments: inlet and a vector of args. `int-msg` and `float-msg` take two arguments: inlet and a number.
 
-Messages sent to `mpls` for message boxes trigger `msg` calls with a vector of their space-delimited contents. An example to illustrate
+Messages sent to `mpls` for message boxes trigger `msg` calls with a vector of their space-delimited contents. An example to illustrate:
 
 Create a message box with the text "reset", then
 
@@ -190,11 +188,11 @@ What huh? Didn't work. Or did it?
 (doall buttons)
 ```
 
-There they are. Clojure `for` is lazy and entries are not realized until asked for. `doall` forces realization (as does printing to the repl, which is why it worked when we didn't assign the buttons to a var).
+There they are! Clojure's `for` is lazy and entries are not realized until asked for. `doall` forces realization (as does printing to the repl, which is why it worked when we didn't assign the buttons to a var).
 
 You could also wrap the `for` statement in `doall` before assigning to `buttons`.
 
-Okay, now let's delete them. We use `mremove`, which isn't called `remove` because Clojure already has a `remove` function.
+Okay, now let's delete them. We use `mremove`:
 
 ```clj
 (map mremove buttons)
@@ -202,7 +200,7 @@ Okay, now let's delete them. We use `mremove`, which isn't called `remove` becau
 
 Pretty neat, huh.
 
-`map` is also lazy, FYI. It works only because the repl realizes the results to print them out. Also, it's not really supposed to be used for side-effecting operations like `mremove`. You should be using `doseq`.
+`map` is also lazy, FYI. It works without `doall` only because the repl realizes the results to print them out. Also, it's not really supposed to be used for side-effecting operations like `mremove`. You _should_ be using `doseq`.
 
 ```clj
 (doseq [b buttons] (mremove b))
@@ -228,7 +226,7 @@ And disconnect
 
 ## Cast of characters
 
-Who's this `box` character? It's the the box that encloses `mxj mpls`. In max we connect boxes, which are all subclasses of `MaxBox` in java extensions. (`mpls` just wraps the java API in Clojure.)
+Who's this `box` character? It's the the box that encloses `mxj mpls`. In Max we connect boxes, which are all subclasses of `MaxBox` in java extensions. (`mpls` just wraps the java API in Clojure.)
 
 Want to know more about `MaxBox`es? You'll want to read the java API.
 
@@ -278,7 +276,7 @@ Use `defer-sync`, which will block until your action completes and return the re
 
 This is exactly how `mnew` works.
 
-So how do you know if your operation needs to be deferred? ¯\_(ツ)_/¯. Trial and error?
+So how do you know if your operation needs to be deferred? ¯\_(ツ)_/¯? Trial and error?
 
 ## Music
 
@@ -290,7 +288,7 @@ TODO (hah!)
 
 ### mpls args
 
-In case you care, you can send args when creating `mpls`. One arg defines the nrepl port (default 51580), two args define the number of inlets and outlets you want (you get an extra info outlet, no extra charge!). Three args set `port`, `n-inlets`, `n-outlets`. Weird scheme, isn't it.
+In case you care, you can provide args when creating `mpls`. One arg defines the nrepl port (default 51580), two args define the number of inlets and outlets you want (you get an extra info outlet, no extra charge!). Three args set `port`, `n-inlets`, `n-outlets`. Weird scheme, isn't it.
 
 ```
 [mxj mpls 1235 5 5]
@@ -300,7 +298,7 @@ In case you care, you can send args when creating `mpls`. One arg defines the nr
 
 If you're using the java API, you'll need to worry about `Atom`s (`com.cycling74.max.Atom` not Clojure's `atom`).
 
-The Max java API often takes and returns values wrapped in the `Atom` class or a java array of `Atom`s. You can easily create these from regular old Clojure values using `matom` and `matoms`
+The Max java API often takes and returns values wrapped in the `Atom` class or a java array of `Atom`s. You can easily create these from regular old Clojure values using `matom` and `matoms`:
 
 ```clj
 (matom 1)
@@ -328,7 +326,7 @@ Most, but not all of `mpls`'s functionality is documented in this README. `mpls`
 
 Those TODOs in this README need TODOing. Pull requests or issues or emails could solve that if you're working on Windows or Linux.
 
-Also, I haven't tested this on anything on but my machine. Pull requests for bug or missing features are appreciated. Github issues are okay, too.
+Also, I haven't tested this on anything on but my machine. Pull requests for bugs or missing features are appreciated. Github issues are okay, too.
 
 And most of all, if you do something cool with this, write a post, and let me know.
 
