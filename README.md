@@ -12,7 +12,7 @@ Live-code Max and Max4Live with Clojure.
 
 ## Setting Up
 
-Download `mpls.jar` and copy it into the java lib folder for Max.
+Download [mpls.jar](https://drive.google.com/file/d/0B36VehDQ2W3od1hRV1E5M2ZaSEU/view?usp=sharing) and copy it into the java lib folder for Max.
 
 Mac: `/Applications/Max 6.1/Cycling '74/java/lib/`  
 Windows: TODO  
