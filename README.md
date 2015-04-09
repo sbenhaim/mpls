@@ -15,8 +15,7 @@ Live-code Max and Max4Live with Clojure.
 Download [mpls.jar](https://drive.google.com/file/d/0B36VehDQ2W3od1hRV1E5M2ZaSEU/view?usp=sharing) and copy it into the java lib folder for Max.
 
 Mac: `/Applications/Max 6.1/Cycling '74/java/lib/`  
-Windows: TODO  
-Linux: TODO  
+Windows: `/Program Files/Common Files/Cycling '74/java/lib/` (possibly)  
 
 ### Doing Stuff
 
@@ -230,9 +229,8 @@ Who's this `box` character? It's the the box that encloses `mxj mpls`. In Max we
 
 Want to know more about `MaxBox`es? You'll want to read the java API.
 
-Mac: /Applications/Max [version]/java-doc/api/index.html  
-Windows: TODO  
-Linux: TODO  
+Mac: `/Applications/Max [version]/java-doc/api/index.html`  
+Windows: `/Program Files/Common Files/Cycling '74/java-doc/api/index.html` (maybe)  
 
 You also have access to a few others
 
@@ -324,7 +322,7 @@ Most, but not all of `mpls`'s functionality is documented in this README. `mpls`
 
 ## Wanna help?
 
-Those TODOs in this README need TODOing. Pull requests or issues or emails could solve that if you're working on Windows or Linux.
+Those TODOs in this README need TODOing. Pull requests or issues or emails could solve that if you're working on Windows.
 
 Also, I haven't tested this on anything on but my machine. Pull requests for bugs or missing features are appreciated. Github issues are okay, too.
 
