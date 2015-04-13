@@ -94,7 +94,7 @@ Bang it again! Congratulations, you're live-coding Max.
 Send a message to an outlet like this:
 
 ```clj
-(out "message")
+(out 0 "message")
 ```
 
 To see your message, create a message box, wire the first outlet of `mxj mpls` to the second inlet of the message box, then do
@@ -102,7 +102,7 @@ To see your message, create a message box, wire the first outlet of `mxj mpls` t
 ![](resources/3.png)
 
 ```clj
-(out "hello out there")
+(out 0 "hello out there")
 ```
 
 Connect the second outlet to an integer box. Then try

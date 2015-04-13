@@ -3,10 +3,11 @@
   :url "https://github.com/sbenhaim/mpls"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.7.0-alpha3"]
+  :dependencies [[org.clojure/clojure "1.7.0-beta1"]
                  [cider/cider-nrepl "0.9.0-SNAPSHOT"]
                  [org.clojure/core.match "0.3.0-alpha4"]
-                 [org.clojure/tools.nrepl "0.2.9"]]
+                 [org.clojure/tools.nrepl "0.2.9"]
+                 [com.cemerick/pomegranate "0.3.0"]]
   :profiles {:provided {:dependencies [[com.cycling74/max "6.1.0"]]}}
   :aot [mpls]
   :jar-name "mpls-small.jar"

@@ -24,7 +24,7 @@
   "Registers calling namespace as the place to look for inlet functions `bang', `int-msg', etc."
   []
   (reset! user-ns *ns*)
-  (println "Looking for functions in" (str *ns*)))
+  (println (str "Looking for functions in `" (str *ns*) "'")))
 
 (defn call-user-fn [sym & args]
   (if-let [f (resolve (symbol (str @user-ns "/" sym)))]
@@ -44,6 +44,9 @@
   (if (or (nil? arg-vec) (empty? arg-vec)) nil
       (into-array Atom (map matom arg-vec))))
 
+(defn ms [& args]
+  (matoms args))
+
 (defn matom->
   "Converts an Atom to a Clojure value."
   [^Atom a]
@@ -59,27 +62,27 @@
   (mapv matom-> as))
 
 (defn start-nrepl [port]
-  (defonce server (server/start-server :port port :handler cider-nrepl-handler))
-  (println "nrepl server running on port " port))
+  (def server (server/start-server :port port :handler cider-nrepl-handler))
+  (println "nrepl server running on port " (:port server)))
 
 (defn -init
-  ([] (-init 51580))
+  ([] (-init 0))
   ([_ _] (-init))
   ([port _ _] (-init port))
   ([port]
-   (defonce port port)
+   (def port port)
      [[] nil]))
 
 (defn -post-init
-  ([this] (-post-init this 1 1))
+  ([this] (-post-init this 5 5))
   ([this _] (-post-init this))
   ([this _ in out] (-post-init this in out))
   ([this in out]
      (.declareIO this in out)
-     (defonce mpls this)
-     (defonce box (.getMaxBox this))
-     (defonce patcher (.getPatcher box))
-     (defonce window (.getWindow patcher))))
+     (def mpls this)
+     (def box (.getMaxBox this))
+     (def patcher (.getPatcher box))
+     (def window (.getWindow patcher))))
 
 (defn -notifyDeleted [this]
   (try
@@ -154,12 +157,8 @@
   (s/join " " (map (fn [[k v]] (str (name k) " : " (s/join " " (return v)))) d)))
 
 (defn out
-  "[what] sends `what' to mpls's 0th outlet.
-  [n what] sends `what' to `n'th outlet.
-  [who n what] sends `what' to `n'th outlet of MaxBox `who'."
-  ([what] (out 0 what))
-  ([n what] (out mpls n what))
-  ([who n what] (.outlet who n what)))
+  "Sends `(matoms what)' to `n'th outlet. "
+  [n & what] (.outlet mpls n (matoms what)))
 
 (defn parse
   "Parse space-delimited string into array of Atoms."
