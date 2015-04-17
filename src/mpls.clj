@@ -115,7 +115,9 @@
   (call-user-fn 'dblclick))
 
 (defn msend [object message & args]
-  (.send object message (matoms args)))
+  (if (string? message)
+    (.send object message (matoms args))
+    (.send object message)))
 
 (defmacro defer
   "Asynchronously execute `body' in the low-priority thread. Returns nil immediately."
