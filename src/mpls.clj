@@ -61,9 +61,30 @@
   [as]
   (mapv matom-> as))
 
+(defn post
+  "Print message to Max window."
+  [msg]
+  (MaxSystem/post msg))
+
+(defn out
+  "Sends `(matoms what)' to `n'th outlet. "
+  [n & what] (.outlet mpls n (matoms what)))
+
+(defn info
+  "Print message to Max window and out the info outlet."
+  [msg]
+  (post msg)
+  (out (.getNumOutlets mpls) msg))
+
+(defn error
+  "Print error to Max window."
+  [msg]
+  (MaxSystem/error msg))
+
 (defn start-nrepl [port]
   (def server (server/start-server :port port :handler cider-nrepl-handler))
-  (println "nrepl server running on port " (:port server)))
+  (let [msg (str "nrepl server running on port " (:port server))]
+    (info msg)))
 
 (defn -init
   ([] (-init 0))
@@ -109,6 +130,7 @@
     (match args
            ["nrepl" "start"] (start-nrepl port)
            ["nrepl" "start" port] (start-nrepl port)
+           ["loadfile" path] (load-file path)
            :else (call-user-fn 'msg args))))
 
 (defn -dblclick [this]
@@ -158,24 +180,10 @@
   [d]
   (s/join " " (map (fn [[k v]] (str (name k) " : " (s/join " " (return v)))) d)))
 
-(defn out
-  "Sends `(matoms what)' to `n'th outlet. "
-  [n & what] (.outlet mpls n (matoms what)))
-
 (defn parse
   "Parse space-delimited string into array of Atoms."
   [s]
   (Atom/parse s))
-
-(defn post
-  "Print message to Max window."
-  [msg]
-  (MaxSystem/post msg))
-
-(defn error
-  "Print error to Max window."
-  [msg]
-  (MaxSystem/error msg))
 
 (defn mremove
   "Remove MaxBox `what' from patcher."
